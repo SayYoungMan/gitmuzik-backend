@@ -41,3 +41,28 @@ func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
 
 	return response.Items
 }
+
+func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) []itemEntry {
+	var (
+		tmp itemEntry
+		rv  []itemEntry
+	)
+
+	for _, item := range playlistItems {
+		tmp.extract(item)
+		rv = append(rv, tmp)
+	}
+
+	return rv
+}
+
+func (tmp *itemEntry) extract(item *youtube.PlaylistItem) {
+	tmp.Title = item.Snippet.Title
+	tmp.AddDate = item.Snippet.PublishedAt
+	tmp.ID = item.Id
+	tmp.VidID = item.Snippet.ResourceId.VideoId
+	tmp.OwnerID = item.Snippet.VideoOwnerChannelId
+	tmp.OwnerTitle = item.Snippet.VideoOwnerChannelTitle
+	tmp.Position = item.Snippet.Position
+	tmp.Description = item.Snippet.Description
+}
