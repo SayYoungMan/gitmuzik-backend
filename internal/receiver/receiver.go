@@ -2,6 +2,8 @@ package receiver
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 
 	"google.golang.org/api/option"
@@ -23,6 +25,18 @@ type itemEntry struct {
 	Description string
 }
 
+type itemEntrySlice []itemEntry
+
+func ReceiveAndSavePlaylistItems(playlistID string, jsonpath string) {
+	items := GetPlaylistItems(playlistID)
+	processedItems := ProcessPlaylistItems(items)
+	jsonbytes := processedItems.makeItemEntryJSON()
+	err := ioutil.WriteFile(jsonpath, jsonbytes, 0644)
+	if err != nil {
+		log.Fatalf("Saving JSON file failed: %v", err)
+	}
+}
+
 func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
 	client := getClient(youtube.YoutubeReadonlyScope)
 	ctx := context.Background()
@@ -42,10 +56,10 @@ func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
 	return response.Items
 }
 
-func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) []itemEntry {
+func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice {
 	var (
 		tmp itemEntry
-		rv  []itemEntry
+		rv  itemEntrySlice
 	)
 
 	for _, item := range playlistItems {
@@ -54,6 +68,16 @@ func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) []itemEntry {
 	}
 
 	return rv
+}
+
+func (items *itemEntrySlice) makeItemEntryJSON() []byte {
+	b, err := json.MarshalIndent(items, "", "  ")
+	if err != nil {
+		log.Fatalf("JSON Marshalling failed: %v\n", err)
+		return nil
+	} else {
+		return b
+	}
 }
 
 func (tmp *itemEntry) extract(item *youtube.PlaylistItem) {
