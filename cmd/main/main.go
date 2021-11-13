@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/SayYoungMan/gitmuzik-backend/internal/receiver"
 )
 
@@ -11,8 +9,5 @@ const (
 )
 
 func main() {
-	items := receiver.GetPlaylistItems(dailyPlaylistID)
-	for _, item := range items {
-		fmt.Println(item.Snippet.Title)
-	}
+	receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, "test.json")
 }
