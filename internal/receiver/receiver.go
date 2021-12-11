@@ -38,10 +38,10 @@ func ReceiveAndSavePlaylistItems(playlistID string, jsonpath string) {
 }
 
 func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
-	client := getClient(youtube.YoutubeReadonlyScope)
+	apiKey := getAPIKey()
 	ctx := context.Background()
 
-	service, err := youtube.NewService(ctx, option.WithHTTPClient(client))
+	service, err := youtube.NewService(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
 		log.Fatalf("Error creating Youtube service: %v", err)
 	}

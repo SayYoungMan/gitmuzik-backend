@@ -1,18 +1,13 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/SayYoungMan/gitmuzik-backend/internal/connector"
-	"github.com/aws/aws-sdk-go/aws"
-)
+import "github.com/SayYoungMan/gitmuzik-backend/internal/receiver"
 
 const (
 	dailyPlaylistID string = "PLXzLX2ct6ysab-Gy0b1Xrm9Ka-Pg-yqmR"
 )
 
 func main() {
-	// receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, "test.json")
+	receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, "test.json")
 
 	// Check connection to db
 	// client := connector.ConnectToDB()
@@ -40,12 +35,12 @@ func main() {
 	// }
 
 	// Check connection to s3
-	client := connector.ConnectToS3()
-	res, err := client.ListBuckets(nil)
-	if err != nil {
-		fmt.Printf("Unable to list buckets, %v", err)
-	}
-	for _, b := range res.Buckets {
-		fmt.Printf("* %s created on %s\n", aws.StringValue(b.Name), aws.TimeValue(b.CreationDate))
-	}
+	// client := connector.ConnectToS3()
+	// res, err := client.ListBuckets(nil)
+	// if err != nil {
+	// 	fmt.Printf("Unable to list buckets, %v", err)
+	// }
+	// for _, b := range res.Buckets {
+	// 	fmt.Printf("* %s created on %s\n", aws.StringValue(b.Name), aws.TimeValue(b.CreationDate))
+	// }
 }
