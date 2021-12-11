@@ -1,6 +1,8 @@
 package receiver
 
-import "log"
+import (
+	"log"
+)
 
 func handleError(err error, message string) {
 	if message == "" {

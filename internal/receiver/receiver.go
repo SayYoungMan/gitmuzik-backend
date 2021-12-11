@@ -3,9 +3,13 @@ package receiver
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"google.golang.org/api/option"
 	"google.golang.org/api/youtube/v3"
 )
@@ -35,6 +39,36 @@ func ReceiveAndSavePlaylistItems(playlistID string, jsonpath string) {
 	if err != nil {
 		log.Fatalf("Saving JSON file failed: %v", err)
 	}
+}
+
+func MoveFileToS3(uploader *s3manager.Uploader,
+	filepath string,
+	bucketName string,
+	key string,
+	removeAfter bool,
+) error {
+	// Open the file in filepath
+	f, err := os.Open(filepath)
+	if err != nil {
+		return fmt.Errorf("failed to open file %q, %v", filepath, err)
+	}
+
+	// Upload the file to s3
+	result, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: &bucketName,
+		Key:    &key,
+		Body:   f,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to upload file, %v", err)
+	}
+	fmt.Printf("file uploaded to, %s\n", aws.StringValue(&result.Location))
+	if removeAfter {
+		if err := os.Remove(filepath); err != nil {
+			return fmt.Errorf("failed to remove file, %v", err)
+		}
+	}
+	return nil
 }
 
 func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
