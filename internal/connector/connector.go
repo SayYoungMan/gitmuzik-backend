@@ -1,6 +1,8 @@
 package connector
 
 import (
+	"context"
+
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -21,7 +23,7 @@ func ConnectToDB() *dynamodb.DynamoDB {
 }
 
 // Connect to S3 bucket and return the client
-func ConnectToS3() *s3.S3 {
+func ConnectToS3(ctx context.Context) *s3.S3 {
 	// Initialize a session that the SDK will use to load
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -33,7 +35,7 @@ func ConnectToS3() *s3.S3 {
 	return svc
 }
 
-func GetS3Uploader(svc *s3.S3) *s3manager.Uploader {
+func GetS3Uploader(ctx context.Context, svc *s3.S3) *s3manager.Uploader {
 	// Create an uploader with the s3 Client and return
 	return s3manager.NewUploaderWithClient(svc)
 }

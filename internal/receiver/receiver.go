@@ -31,17 +31,19 @@ type itemEntry struct {
 
 type itemEntrySlice []itemEntry
 
-func ReceiveAndSavePlaylistItems(playlistID string, jsonpath string) {
-	items := GetPlaylistItems(playlistID)
-	processedItems := ProcessPlaylistItems(items)
-	jsonbytes := processedItems.makeItemEntryJSON()
+func ReceiveAndSavePlaylistItems(ctx context.Context, playlistID string, jsonpath string) {
+	items := GetPlaylistItems(ctx, playlistID)
+	processedItems := processPlaylistItems(items)
+	jsonbytes := processedItems.makeItemEntryJSON(ctx)
 	err := ioutil.WriteFile(jsonpath, jsonbytes, 0644)
 	if err != nil {
 		log.Fatalf("Saving JSON file failed: %v", err)
 	}
 }
 
-func MoveFileToS3(uploader *s3manager.Uploader,
+func MoveFileToS3(
+	ctx context.Context,
+	uploader *s3manager.Uploader,
 	filepath string,
 	bucketName string,
 	key string,
@@ -71,9 +73,8 @@ func MoveFileToS3(uploader *s3manager.Uploader,
 	return nil
 }
 
-func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
+func GetPlaylistItems(ctx context.Context, playlistID string) []*youtube.PlaylistItem {
 	apiKey := getAPIKey()
-	ctx := context.Background()
 
 	service, err := youtube.NewService(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
@@ -90,7 +91,7 @@ func GetPlaylistItems(playlistID string) []*youtube.PlaylistItem {
 	return response.Items
 }
 
-func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice {
+func processPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice {
 	var (
 		tmp itemEntry
 		rv  itemEntrySlice
@@ -104,7 +105,7 @@ func ProcessPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice 
 	return rv
 }
 
-func (items *itemEntrySlice) makeItemEntryJSON() []byte {
+func (items *itemEntrySlice) makeItemEntryJSON(ctx context.Context) []byte {
 	b, err := json.MarshalIndent(items, "", "  ")
 	if err != nil {
 		log.Fatalf("JSON Marshalling failed: %v\n", err)

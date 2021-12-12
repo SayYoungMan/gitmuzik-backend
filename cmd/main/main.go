@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/SayYoungMan/gitmuzik-backend/internal/connector"
@@ -14,6 +15,7 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
 	// receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, "test.json")
 
 	// Check connection to db
@@ -52,10 +54,10 @@ func main() {
 	// }
 
 	// Check s3 File upload
-	receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, testFilePath)
-	client := connector.ConnectToS3()
-	uploader := connector.GetS3Uploader(client)
-	err := receiver.MoveFileToS3(uploader, testFilePath, testBucketName, "test-key", true)
+	receiver.ReceiveAndSavePlaylistItems(ctx, dailyPlaylistID, testFilePath)
+	client := connector.ConnectToS3(ctx)
+	uploader := connector.GetS3Uploader(ctx, client)
+	err := receiver.MoveFileToS3(ctx, uploader, testFilePath, testBucketName, "test-key", true)
 	if err != nil {
 		fmt.Println("Failed")
 	} else {
