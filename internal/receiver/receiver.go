@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 
+	"github.com/SayYoungMan/gitmuzik-backend/internal/logger"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"google.golang.org/api/option"
@@ -33,11 +33,11 @@ type itemEntrySlice []itemEntry
 
 func ReceiveAndSavePlaylistItems(ctx context.Context, playlistID string, jsonpath string) {
 	items := GetPlaylistItems(ctx, playlistID)
-	processedItems := processPlaylistItems(items)
+	processedItems := processPlaylistItems(ctx, items)
 	jsonbytes := processedItems.makeItemEntryJSON(ctx)
 	err := ioutil.WriteFile(jsonpath, jsonbytes, 0644)
 	if err != nil {
-		log.Fatalf("Saving JSON file failed: %v", err)
+		logger.FromContext(ctx).Fatalf("Saving JSON file failed: %v", err)
 	}
 }
 
@@ -78,20 +78,24 @@ func GetPlaylistItems(ctx context.Context, playlistID string) []*youtube.Playlis
 
 	service, err := youtube.NewService(ctx, option.WithAPIKey(apiKey))
 	if err != nil {
-		log.Fatalf("Error creating Youtube service: %v", err)
+		logger.FromContext(ctx).Fatalf("Error creating Youtube service: %v", err)
 	}
 	itemService := youtube.NewPlaylistItemsService(service)
+	logger.FromContext(ctx).Info("Youtube Playlist Service Initialized.")
 
 	call := itemService.List([]string{"snippet"})
 	call = call.PlaylistId(playlistID)
 	call = call.MaxResults(maxResult)
 	response, err := call.Do()
-	handleError(err, "")
+	if err != nil {
+		logger.FromContext(ctx).Fatalf("Error making API call: %v", err)
+	}
+	logger.FromContext(ctx).Info("Playlist Items Obtained.")
 
 	return response.Items
 }
 
-func processPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice {
+func processPlaylistItems(ctx context.Context, playlistItems []*youtube.PlaylistItem) itemEntrySlice {
 	var (
 		tmp itemEntry
 		rv  itemEntrySlice
@@ -102,15 +106,18 @@ func processPlaylistItems(playlistItems []*youtube.PlaylistItem) itemEntrySlice 
 		rv = append(rv, tmp)
 	}
 
+	logger.FromContext(ctx).Info("Playlist Items Processed.")
+
 	return rv
 }
 
 func (items *itemEntrySlice) makeItemEntryJSON(ctx context.Context) []byte {
 	b, err := json.MarshalIndent(items, "", "  ")
 	if err != nil {
-		log.Fatalf("JSON Marshalling failed: %v\n", err)
+		logger.FromContext(ctx).Fatalf("JSON Marshalling failed: %v\n", err)
 		return nil
 	} else {
+		logger.FromContext(ctx).Info("JSON Marshalling Successful.")
 		return b
 	}
 }
