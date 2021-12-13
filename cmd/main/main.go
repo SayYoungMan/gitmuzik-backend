@@ -56,7 +56,7 @@ func main() {
 	receiver.ReceiveAndSavePlaylistItems(ctx, dailyPlaylistID, testFilePath)
 	client := connector.ConnectToS3(ctx)
 	uploader := connector.GetS3Uploader(ctx, client)
-	err := receiver.MoveFileToS3(ctx, uploader, testFilePath, testBucketName, "test-key", true)
+	err := receiver.MoveFileToS3(ctx, uploader, testFilePath, testBucketName, receiver.MakeFileName(dailyPlaylistID), true)
 	if err != nil {
 		logger.FromContext(ctx).Fatalf("Failed to Move File to S3: %v", err)
 	} else {

@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/SayYoungMan/gitmuzik-backend/internal/logger"
 	"github.com/aws/aws-sdk-go/aws"
@@ -131,4 +133,15 @@ func (tmp *itemEntry) extract(item *youtube.PlaylistItem) {
 	tmp.OwnerTitle = item.Snippet.VideoOwnerChannelTitle
 	tmp.Position = item.Snippet.Position
 	tmp.Description = item.Snippet.Description
+}
+
+func MakeFileName(playlistID string) string {
+	shortID := strings.Split(playlistID, "-")[0]
+	now := time.Now()
+	YY, M, DD := now.Date()
+	MM := int(M)
+	hh := now.Hour()
+	mm := now.Minute()
+
+	return fmt.Sprintf("%v (%v-%v-%v %v:%v).json", shortID, YY, MM, DD, hh, mm)
 }
