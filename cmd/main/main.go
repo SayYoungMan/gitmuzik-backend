@@ -1,11 +1,7 @@
 package main
 
 import (
-	"context"
-	"fmt"
-
-	"github.com/SayYoungMan/gitmuzik-backend/internal/connector"
-	"github.com/SayYoungMan/gitmuzik-backend/internal/receiver"
+	"github.com/SayYoungMan/gitmuzik-backend/internal/logger"
 )
 
 const (
@@ -15,7 +11,9 @@ const (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx := logger.GetNewContextWithLogger()
+	logger.FromContext(ctx).Info("Logger attached to context!")
+
 	// receiver.ReceiveAndSavePlaylistItems(dailyPlaylistID, "test.json")
 
 	// Check connection to db
@@ -54,13 +52,13 @@ func main() {
 	// }
 
 	// Check s3 File upload
-	receiver.ReceiveAndSavePlaylistItems(ctx, dailyPlaylistID, testFilePath)
-	client := connector.ConnectToS3(ctx)
-	uploader := connector.GetS3Uploader(ctx, client)
-	err := receiver.MoveFileToS3(ctx, uploader, testFilePath, testBucketName, "test-key", true)
-	if err != nil {
-		fmt.Println("Failed")
-	} else {
-		fmt.Println("Success")
-	}
+	// receiver.ReceiveAndSavePlaylistItems(ctx, dailyPlaylistID, testFilePath)
+	// client := connector.ConnectToS3(ctx)
+	// uploader := connector.GetS3Uploader(ctx, client)
+	// err := receiver.MoveFileToS3(ctx, uploader, testFilePath, testBucketName, "test-key", true)
+	// if err != nil {
+	// 	fmt.Println("Failed")
+	// } else {
+	// 	fmt.Println("Success")
+	// }
 }
