@@ -3,6 +3,7 @@ package connector
 import (
 	"context"
 
+	"github.com/SayYoungMan/gitmuzik-backend/internal/logger"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -32,10 +33,16 @@ func ConnectToS3(ctx context.Context) *s3.S3 {
 	// Create S3 client
 	svc := s3.New(sess)
 
+	logger.FromContext(ctx).Info("S3 client successfully created")
+
 	return svc
 }
 
 func GetS3Uploader(ctx context.Context, svc *s3.S3) *s3manager.Uploader {
 	// Create an uploader with the s3 Client and return
-	return s3manager.NewUploaderWithClient(svc)
+	uploader := s3manager.NewUploaderWithClient(svc)
+
+	logger.FromContext(ctx).Info("S3 Uploader successfully created")
+
+	return uploader
 }

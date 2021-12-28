@@ -20,6 +20,8 @@ func GetNewContextWithLogger() context.Context {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, ContextKey{}, getNewLogger())
 
+	FromContext(ctx).Info("Logger successfully created for the context")
+
 	return ctx
 }
 
