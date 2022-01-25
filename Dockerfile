@@ -13,4 +13,8 @@ COPY internal internal
 
 RUN go build -o main ./cmd/main
 
-CMD [ "./main" ]
+COPY credentials ./
+COPY apikey.txt ./
+COPY entrypoint.sh ./
+
+CMD [ "sh", "entrypoint.sh" ]
