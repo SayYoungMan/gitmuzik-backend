@@ -3,3 +3,10 @@ apikey.txt
 
 # credentials for AWS
 credentials
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
